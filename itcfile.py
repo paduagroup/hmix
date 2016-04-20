@@ -13,43 +13,38 @@ def readitc(infile):
         title = f.readline()
         tok = f.readline().strip().split()
         if tok[0].startswith('amp') and len(tok) >= 3:
-                n1c, n2c = [ float(tok[i]) for i in [1, 2] ]
+                n1c, n2c = [ float(tok[i]) for i in [1, 2] ]   # mol
         else:
             print('error: line 2 in ITC file {0} is not\n'
-                '       ampoule: n1c n2c\n'
-                '       n1c, n2c (mol) amounts in ampoule'.format(infile))
+                'ampoule: n1c n2c   # amounts in ampoule (mol)'.format(infile))
             sys.exit(0)
         tok = f.readline().strip().split()
         if tok[0].startswith('dis') and len(tok) >= 5:
                 x1d, x2d, rhod, vd = [ float(tok[i]) for i in [1, 2, 3, 4] ]
+                n1d = x1d * rhod * vd * 1.0e-6    # mol
+                n2d = x2d * rhod * vd * 1.0e-6    # mol
         else:
             print('error: line 3 in ITC file {0} is not\n'
-                '       dispenser: x1 x2 rho v\n'
-                '       composition in dispenser, '
-                'rho (mol/L), v (muL)'.format(infile))
+                'dispenser: x1 x2 rho v   # composition rho/(mol/L) '
+                'v/(muL)'.format(infile))
             sys.exit(0)
-        i = 1
-        while 1:
-            line = f.readline()
-            if not line:
-                break
+            
+        for line in f.readlines():
             if line.startswith('#'):
                 continue
             tok = line.strip().split()
-            q = float(tok[0])
+            q = float(tok[0])             # mJ
             
-            n1d = i * x1d * rhod * vd * 1.0e-6   # mol
-            n2d = i * x2d * rhod * vd * 1.0e-6   # mol
             pt = {}
             pt['n1c'] = n1c               # mol
             pt['n2c'] = n2c               # mol
-            pt['n1d'] = n1d
-            pt['n2d'] = n2d
-            pt['q'] = q                   # J
+            pt['n1d'] = n1d * 1000.0      # mmol
+            pt['n2d'] = n2d * 1000.0      # mmol
+            pt['q'] = q * 0.001           # J
             itc.append(pt)
+            
             n1c += n1d
             n2c += n2d
-            i += 1
     return itc
 
 
@@ -77,8 +72,7 @@ def main():
     print('# n1c/mol     n2c/mol      n1d/mmol     n2d/mmol     Q/J')
     for pt in itc:
         print('{0:12.5e} {1:12.5e} {2:12.5e} {3:12.5e} {4:12.5e}'.format(
-            pt['n1c'], pt['n2c'], pt['n1d'] * 1.0e3, pt['n2d'] * 1.0e3,
-            pt['q']))
+            pt['n1c'], pt['n2c'], pt['n1d'], pt['n2d'], pt['q']))
     
 
 if __name__ == '__main__':

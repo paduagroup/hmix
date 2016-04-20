@@ -27,8 +27,8 @@ def readitc(infile):
         pt = {}
         pt['n1c'] = n1c
         pt['n2c'] = n2c
-        pt['n1d'] = n1d * 1.0e-3
-        pt['n2d'] = n2d * 1.0e-3
+        pt['n1d'] = n1d * 0.001           # mol
+        pt['n2d'] = n2d * 0.001           # mol
         pt['q'] = q
         itc.append(pt)
     return itc
@@ -183,23 +183,28 @@ def main():
     a[3] = result.params['a3'].value
     a[4] = result.params['a4'].value
 
+    print('RK parameters in kJ/mol')
+    for i in range(5):
+        print('  a[{0:1d}] = {1:12.5f}'.format(i, a[i] * 0.001))
+    
     qc = np.zeros(npts)
     for i in range(npts):
         qc[i] = qcalc(itc[i], a)
 
     qfile = fname + '_q.out'
     with open(qfile, 'w') as f:
-        f.write('#     x2        Qexp/J       Qcalc/J\n')
+        f.write('#     x2        Qexp/kJ      Qcalc/kJ\n')
         for i in range(npts):
             f.write('{0:5d} {1:8.6f} {2:12.5e} {3:12.5e}\n'.format(i, x2[i],
                   q[i], qc[i]))
     print('calculated heats:\n  {0}'.format(qfile))
 
     if args.plot and plotlib:
-        plt.axis([0, npts, -0.1, 0.1])
-        plt.plot([0, npts], [0.0, 0.0], 'k--')
-        plt.plot(qc - q, 'r+')
-        plt.xlabel('data')
+        # plt.axis([0, npts, -0.1, 0.1])
+        # plt.plot([0, npts], [0.0, 0.0], 'k--')
+        plt.plot([0, 1.0], [0.0, 0.0], 'k--')
+        plt.plot(x2, (qc - q) * 1000.0, 'r+')   # J
+        plt.xlabel('x2')
         plt.ylabel('Q (J)')
         plt.show()
 
@@ -211,25 +216,25 @@ def main():
         pt = itc[i]
         if pt['n1d'] > 0.0 and pt['n2d'] == 0.0:
             x1exp.append(x2[i])
-            h1exp.append(pt['q'] / pt['n1d'])
+            h1exp.append(pt['q'] / pt['n1d'] * 0.001)   # kJ/mol
         if pt['n2d'] > 0.0 and pt['n1d'] == 0.0:
             x2exp.append(x2[i])
-            h2exp.append(pt['q'] / pt['n2d'])
+            h2exp.append(pt['q'] / pt['n2d'] * 0.001)   # kJ/mol
     h1file = fname + '_h1.out'
     h2file = fname + '_h2.out'
     with open(h1file, 'w') as f:
-        f.write('# x2      h1exp/(J/mol)\n')
+        f.write('# x2      h1exp/(kJ/mol)\n')
         for i in range(len(h1exp)):
             f.write('{0:8.6f} {1:12.5e}\n'.format(x1exp[i], h1exp[i]))
     with open(h2file, 'w') as f:
-        f.write('# x2      h2exp/(J/mol)\n')
+        f.write('# x2      h2exp/(kJ/mol)\n')
         for i in range(len(h2exp)):
             f.write('{0:8.6f} {1:12.5e}\n'.format(x2exp[i], h2exp[i]))
     print('experimental partial molar h:\n  {0}\n  {1}'.format(h1file,
                                                                h2file))
 
     # fitted parameters from Matteoli
-    # a = [608.72, 3954.6, -950.93, 3618.5, -1120.9]
+    # a = [0.60872, 3.9546, -0.95093, 3.6185, -1.1209]
 
     nx = 101
     x2rk = np.linspace(0.0, 1.0, nx)
@@ -237,19 +242,19 @@ def main():
     h2fit = np.zeros(nx)
     he = np.zeros(nx)
     for i in range(nx):
-        h1fit[i] = h1rk(1.0 - x2rk[i], a)
-        h2fit[i] = h2rk(x2rk[i], a)
-        he[i] = herk2(x2rk[i], a)
+        h1fit[i] = h1rk(1.0 - x2rk[i], a) * 0.001   # kJ/mol
+        h2fit[i] = h2rk(x2rk[i], a) * 0.001         # kJ/mol
+        he[i] = herk2(x2rk[i], a) * 0.001           # kJ/mol
     hrkfile = fname + '_hrk.out'
     with open(hrkfile, 'w') as f:
-        f.write('# x2      h1/(J/mol)   h2/(J/mol)   he/(J/mol)\n')
+        f.write('# x2      h1/(kJ/mol)  h2/(kJ/mol)  he/(kJ/mol)\n')
         for i in range(101):
             f.write('{0:8.6f} {1:12.5e} {2:12.5e} {3:12.5e}\n'.format(
                     x2rk[i], h1fit[i], h2fit[i], he[i]))
     print('calculated partial molar and excess H:\n  {0}'.format(hrkfile))
 
     if args.plot and plotlib:
-        plt.axis([0, 1.0, -11000.0, 7000.0])
+        # plt.axis([0, 1.0, -11.0, 7.0])
         plt.plot([0.0, 1.0], [0.0, 0.0], 'k--')
         plt.plot(x1exp, h1exp, 'ro')
         plt.plot(x2exp, h2exp, 'bo')
@@ -257,7 +262,7 @@ def main():
         plt.plot(x2rk, h2fit, 'b')
         plt.plot(x2rk, he, 'k')
         plt.xlabel('x2')
-        plt.ylabel('H / (kJ/mol)')
+        plt.ylabel('HE, Hi / (kJ/mol)')
         plt.show()
 
 
