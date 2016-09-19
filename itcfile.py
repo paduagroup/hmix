@@ -1,5 +1,5 @@
 #! /usr/local/bin/python3
-# itcfile.py - convert ITC run data files to Mateolli format
+# itcfile.py - convert ITC run data files to Matteoli format
 
 import sys
 import argparse

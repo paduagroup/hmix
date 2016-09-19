@@ -130,7 +130,7 @@ def main():
         'and calculate partial molar enthaplies and enthalpy of mixing.\n'
         'Input file with same format as data tables in\n'
         'E. Matteoli, L. Lepori, Fluid Phase Eq. 174 (2000) 115-131:\n'
-        'n1c/mol n2c/mol n1d/mmol n2s/mmol Q/J\n...',
+        'n1c/mol n2c/mol n1d/mmol n2d/mmol Q/J\n...',
         formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('-d', '--degree', type = int, default = 4,
                         help = 'degree of RK polynomial (default 4)')
