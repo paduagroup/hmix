@@ -1,4 +1,4 @@
-#! /usr/local/bin/python3
+#!/usr/bin/env python
 # itcfile.py - convert ITC run data files to Matteoli format
 
 import sys
@@ -54,9 +54,9 @@ def main():
         'E. Matteoli, L. Lepori, Fluid Phase Eq. 174 (2000) 115-131\n\n'
         'Format for input files:\n\n'
         'title\n'
-        'n1c/mol n2c/mol            # amounts in ampoule\n'
-        'x1d x2d rho/(mol/L) v/muL  # mole fractions, density, volume of '
-        'addition\n'
+        'ampoule: n1c/mol n2c/mol              # amounts in ampoule\n'
+        'dispenser: x1d x2d rho/(mol/L) v/muL  # mole fractions, density,'
+        ' volume of addition\n'
         'Q/mJ\n'
         '...',
         formatter_class=argparse.RawDescriptionHelpFormatter)

@@ -136,6 +136,8 @@ def main():
                         help = 'degree of RK polynomial (default 4)')
     parser.add_argument('--plot', action = 'store_true',
                         help = 'plot results using matplotlib')
+    parser.add_argument('-n', '--nx', type = int, default = 101,
+                        help = 'number of x points to plot (default 101)')
     parser.add_argument('itcfile', help = 'file with ITC data')
     args = parser.parse_args()
 
@@ -193,7 +195,7 @@ def main():
 
     qfile = fname + '_q.out'
     with open(qfile, 'w') as f:
-        f.write('#     x2        Qexp/kJ      Qcalc/kJ\n')
+        f.write('#     x2        Qexp/J      Qcalc/J\n')
         for i in range(npts):
             f.write('{0:5d} {1:8.6f} {2:12.5e} {3:12.5e}\n'.format(i, x2[i],
                   q[i], qc[i]))
@@ -203,9 +205,9 @@ def main():
         # plt.axis([0, npts, -0.1, 0.1])
         # plt.plot([0, npts], [0.0, 0.0], 'k--')
         plt.plot([0, 1.0], [0.0, 0.0], 'k--')
-        plt.plot(x2, (qc - q) * 1000.0, 'r+')   # J
+        plt.plot(x2, (qc - q) * 1000.0, 'r+')   # mJ
         plt.xlabel('x2')
-        plt.ylabel('Q (J)')
+        plt.ylabel('Q (mJ)')
         plt.show()
 
     x1exp = []
@@ -236,7 +238,7 @@ def main():
     # fitted parameters from Matteoli
     # a = [0.60872, 3.9546, -0.95093, 3.6185, -1.1209]
 
-    nx = 101
+    nx = args.nx
     x2rk = np.linspace(0.0, 1.0, nx)
     h1fit = np.zeros(nx)
     h2fit = np.zeros(nx)
@@ -248,7 +250,7 @@ def main():
     hrkfile = fname + '_hrk.out'
     with open(hrkfile, 'w') as f:
         f.write('# x2      h1/(kJ/mol)  h2/(kJ/mol)  he/(kJ/mol)\n')
-        for i in range(101):
+        for i in range(nx):
             f.write('{0:8.6f} {1:12.5e} {2:12.5e} {3:12.5e}\n'.format(
                     x2rk[i], h1fit[i], h2fit[i], he[i]))
     print('calculated partial molar and excess H:\n  {0}'.format(hrkfile))
